@@ -31,7 +31,7 @@ def session_start(id, web_ip, web_agent):
     # подключаемся к БД
     db = dbConnector.create_connection()
     # получаем текущее время
-    time_start = datetime.now().date()
+    time_start = datetime.now()
     # к текущему времени прибавляем 5 минут
     time_end = time_start + timedelta(minutes=5)
     # описываем запрос и значения для него
