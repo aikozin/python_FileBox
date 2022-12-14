@@ -8,7 +8,7 @@ def check_free_id(id):
     # думаем, что id не используется
     is_free_id = False
     # подключаемся к БД
-    db = dbConnector.createConnection()
+    db = dbConnector.create_connection()
     # описываем запрос и значения для него
     query = 'select * from session where id=%s'
     val = (str(id),)
@@ -29,7 +29,7 @@ def check_free_id(id):
 # метод для старта сессии
 def session_start(id, web_ip, web_agent):
     # подключаемся к БД
-    db = dbConnector.createConnection()
+    db = dbConnector.create_connection()
     # получаем текущее время
     time_start = datetime.now().date()
     # к текущему времени прибавляем 5 минут
