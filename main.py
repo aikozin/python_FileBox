@@ -31,6 +31,24 @@ def session_start():
     return jsonify(id=id)
 
 
+@app.route("/session/mobile/connect", methods=['POST'])
+def session_mobile_connect():
+    request_data = request.get_json()
+    mobile_ip = request_data['mobile_ip']
+    mobile_agent = request_data['mobile_agent']
+    id = request_data['id']
+
+    sessionController.session_mobile_connect(id, mobile_ip, mobile_agent)
+    sessionController.update_time_end(id)
+    session = sessionController.get_session_info(id)
+    return jsonify(
+        time_start=session['time_start'],
+        time_end=session['time_end'],
+        web_ip=session['web_ip'],
+        web_agent=session['web_agent']
+    )
+
+
 @app.route("/data/send", methods=['POST'])
 def send_data():
     # получаем загружаемый файл

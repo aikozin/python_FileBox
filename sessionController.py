@@ -45,3 +45,64 @@ def session_start(id, web_ip, web_agent):
         db.commit()
     # закрываем коннект к БД
     db.close()
+
+
+# метод коннекта телефона к сессии
+def session_mobile_connect(id, mobile_ip, mobile_agent):
+    # подключаемся к БД
+    db = dbConnector.create_connection()
+    # описание запроса
+    query = 'UPDATE session SET mobile_ip = %s, mobile_agent = %s WHERE id = %s'
+    val = (mobile_ip, mobile_agent, id)
+    # работа с БД
+    with db.cursor() as cursor:
+        # выполняем запрос
+        cursor.execute(query, val)
+        # завершаем транзакцию
+        db.commit()
+    # закрываем коннект к БД
+    db.close()
+
+
+def get_session_info(id):
+    # подключаемся к БД
+    db = dbConnector.create_connection()
+    # описание запроса
+    query = 'SELECT * FROM session WHERE id = %s'
+    val = (id,)
+    # работа с БД
+    with db.cursor() as cursor:
+        # выполняем запрос
+        cursor.execute(query, val)
+        result = cursor.fetchone()
+        row = {
+            "id": result[0],
+            "time_start": result[1],
+            "time_end": result[2],
+            "web_ip": result[3],
+            "web_agent": result[4],
+            "mobile_ip": result[5],
+            "mobile_agent": result[6]
+        }
+    db.close()
+    return row
+
+
+def update_time_end(id):
+    # получаем текущее время
+    time_current = datetime.now()
+    # к текущему времени прибавляем 5 минут
+    time_end = time_current + timedelta(minutes=5)
+    # подключаемся к БД
+    db = dbConnector.create_connection()
+    # описание запроса
+    query = 'UPDATE session SET time_end = %s WHERE id = %s'
+    val = (time_end, id)
+    # работа с БД
+    with db.cursor() as cursor:
+        # выполняем запрос
+        cursor.execute(query, val)
+        # завершаем транзакцию
+        db.commit()
+    # закрываем коннект к БД
+    db.close()
