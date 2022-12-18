@@ -55,5 +55,18 @@ def send_data():
     return '', 200
 
 
+@app.route("/data/check", methods=['GET'])
+def check_data():
+    # получаем json информацию от клиента в массив request_data
+    request_data = request.get_json()
+    # вытягиваем из json id_session и status
+    id_session = request_data['id_session']
+    status = request_data['status']
+    # получаем массив файлов
+    result = dataController.get_files_info(id_session, status)
+    # возвращаем пользователю json с массивом файлов files
+    return jsonify(files=result)
+
+
 if __name__ == "__main__":
     app.run(debug=True)

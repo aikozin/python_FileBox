@@ -20,4 +20,27 @@ def send_data_db(id_session, type, file_name_real, file_name_fs):
 
 
 def send_data_fs(file_name_fs, file):
-    file.save(os.path.join(UPLOAD_FOLDER, file_name_fs))
+    file_path = os.path.join(UPLOAD_FOLDER, file_name_fs)
+    file.save(file_path)
+
+
+def get_files_info(id_session, status):
+    json = list()
+    db = dbConnector.create_connection()
+    query = 'select * from data where id_session=%s and status=%s'
+    val = (id_session, status)
+    with db.cursor() as cursor:
+        cursor.execute(query, val)
+        result = cursor.fetchall()
+        for row in result:
+            file = {
+                "id": row[0],
+                "type": row[2],
+                "file_name_real": row[3],
+                "file_name_fs": row[4],
+                "time_birth": row[5],
+                "time_death": row[6],
+            }
+            json.append(file)
+    db.close()
+    return json
