@@ -14,9 +14,14 @@ def session_start():
     # получаем json информацию от клиента в массив request_data
     request_data = request.get_json()
     # вытягиваем из json web_ip и web_agent
-    web_ip = request_data['web_ip']
-    web_agent = request_data['web_agent']
-    if web_ip == '' or web_agent == '':
+    if request_data:
+        if 'web_ip' not in request_data or 'web_agent' not in request_data:
+            return jsonify(error='Ошибка в параметрах запроса'), 400
+        web_ip = request_data['web_ip']
+        web_agent = request_data['web_agent']
+        if web_ip == '' or web_agent == '':
+            return jsonify(error='Ошибка в параметрах запроса'), 400
+    else:
         return jsonify(error='Ошибка в параметрах запроса'), 400
 
     # бесконечный цикл
