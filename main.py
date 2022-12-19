@@ -3,8 +3,8 @@ import uuid
 
 from flask import Flask, request, jsonify
 
-import dataController
-import sessionController
+import data_controller
+import session_controller
 
 app = Flask(__name__)
 
@@ -23,10 +23,10 @@ def session_start():
         # генерируем id
         id = str(uuid.uuid4())
         # проверяем свободен ли id в БД, если свободен - выходим из цикла
-        if sessionController.check_free_id(id):
+        if session_controller.check_free_id(id):
             break
     # сохраняем информацию в БД методом sessionStart
-    sessionController.session_start(id, web_ip, web_agent)
+    session_controller.session_start(id, web_ip, web_agent)
     # возвращаем пользователю json с id
     return jsonify(id=id)
 
@@ -38,9 +38,9 @@ def session_mobile_connect():
     mobile_agent = request_data['mobile_agent']
     id = request_data['id']
 
-    sessionController.session_mobile_connect(id, mobile_ip, mobile_agent)
-    sessionController.update_time_end(id)
-    session = sessionController.get_session_info(id)
+    session_controller.session_mobile_connect(id, mobile_ip, mobile_agent)
+    session_controller.update_time_end(id)
+    session = session_controller.get_session_info(id)
     return jsonify(
         time_start=session['time_start'],
         time_end=session['time_end'],
@@ -67,9 +67,9 @@ def send_data():
     # генерируем имя для файла в файловой системе из части id_session + uuid + расширение файла
     file_name_fs = id_session[:5] + str(uuid.uuid4()) + os.path.splitext(file_name_real)[1]
     # сохраняем инфу о файле в БД
-    dataController.send_data_db(id_session, type, file_name_real, file_name_fs)
+    data_controller.send_data_db(id_session, type, file_name_real, file_name_fs)
     # сохраняем файл в файловой системе
-    dataController.send_data_fs(file_name_fs, file)
+    data_controller.send_data_fs(file_name_fs, file)
     return '', 200
 
 
@@ -81,7 +81,7 @@ def check_data():
     id_session = request_data['id_session']
     status = request_data['status']
     # получаем массив файлов
-    result = dataController.get_files_info(id_session, status)
+    result = data_controller.get_files_info(id_session, status)
     # возвращаем пользователю json с массивом файлов files
     return jsonify(files=result)
 

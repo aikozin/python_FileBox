@@ -1,13 +1,13 @@
 import os
 from datetime import datetime, timedelta
 
-import dbConnector
+import db_connector
 
 UPLOAD_FOLDER = 'D:\\000FileBox'
 
 
 def send_data_db(id_session, type, file_name_real, file_name_fs):
-    db = dbConnector.create_connection()
+    db = db_connector.create_connection()
     time_start = datetime.now()
     time_end = time_start + timedelta(minutes=30)
     query = 'insert into data (id_session, type, file_name_real, file_name_fs, time_birth, time_death, status) ' \
@@ -26,7 +26,7 @@ def send_data_fs(file_name_fs, file):
 
 def get_files_info(id_session, status):
     json = list()
-    db = dbConnector.create_connection()
+    db = db_connector.create_connection()
     query = 'select * from data where id_session=%s and status=%s'
     val = (id_session, status)
     with db.cursor() as cursor:

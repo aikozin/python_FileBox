@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 
-import dbConnector
+import db_connector
 
 
 # метод проверки использования id
@@ -8,7 +8,7 @@ def check_free_id(id):
     # думаем, что id не используется
     is_free_id = False
     # подключаемся к БД
-    db = dbConnector.create_connection()
+    db = db_connector.create_connection()
     # описываем запрос и значения для него
     query = 'select * from session where id=%s'
     val = (str(id),)
@@ -29,7 +29,7 @@ def check_free_id(id):
 # метод для старта сессии
 def session_start(id, web_ip, web_agent):
     # подключаемся к БД
-    db = dbConnector.create_connection()
+    db = db_connector.create_connection()
     # получаем текущее время
     time_start = datetime.now()
     # к текущему времени прибавляем 5 минут
@@ -50,7 +50,7 @@ def session_start(id, web_ip, web_agent):
 # метод коннекта телефона к сессии
 def session_mobile_connect(id, mobile_ip, mobile_agent):
     # подключаемся к БД
-    db = dbConnector.create_connection()
+    db = db_connector.create_connection()
     # описание запроса
     query = 'UPDATE session SET mobile_ip = %s, mobile_agent = %s WHERE id = %s'
     val = (mobile_ip, mobile_agent, id)
@@ -66,7 +66,7 @@ def session_mobile_connect(id, mobile_ip, mobile_agent):
 
 def get_session_info(id):
     # подключаемся к БД
-    db = dbConnector.create_connection()
+    db = db_connector.create_connection()
     # описание запроса
     query = 'SELECT * FROM session WHERE id = %s'
     val = (id,)
@@ -94,7 +94,7 @@ def update_time_end(id):
     # к текущему времени прибавляем 5 минут
     time_end = time_current + timedelta(minutes=5)
     # подключаемся к БД
-    db = dbConnector.create_connection()
+    db = db_connector.create_connection()
     # описание запроса
     query = 'UPDATE session SET time_end = %s WHERE id = %s'
     val = (time_end, id)
