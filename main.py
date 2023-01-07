@@ -40,9 +40,16 @@ def session_start():
 @app.route("/session/mobile/connect", methods=['POST'])
 def session_mobile_connect():
     request_data = request.get_json()
-    mobile_ip = request_data['mobile_ip']
-    mobile_agent = request_data['mobile_agent']
-    id_session = request_data['id']
+    if request_data:
+        if 'mobile_ip' not in request_data or 'mobile_agent' not in request_data or 'id_session' not in request_data:
+            return jsonify(error='Ошибка в параметрах запроса'), 400
+        mobile_ip = request_data['mobile_ip']
+        mobile_agent = request_data['mobile_agent']
+        id_session = request_data['id']
+        if mobile_ip == '' or mobile_agent == '' or id_session == '':
+            return jsonify(error='Ошибка в параметрах запроса'), 400
+    else:
+        return jsonify(error='Ошибка в параметрах запроса'), 400
 
     session_controller.session_mobile_connect(id_session, mobile_ip, mobile_agent)
     session_controller.update_time_end(id_session)
