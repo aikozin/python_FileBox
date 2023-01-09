@@ -15,7 +15,7 @@ def check_free_id(id_session):
     # подключаемся к БД
     db = db_connector.create_connection()
     # описываем запрос и значения для него
-    query = 'select * from session where id=%s'
+    query = 'select * from session where id_session=%s'
     val = (str(id_session),)
     # работа с БД
     with db.cursor() as cursor:
@@ -47,7 +47,7 @@ def session_start(id_session, web_ip, web_agent):
     # к текущему времени прибавляем 5 минут
     time_end = time_start + timedelta(minutes=5)
     # описываем запрос и значения для него
-    query = 'insert into session (id, time_start, time_end, web_ip, web_agent) values (%s, %s, %s, %s, %s)'
+    query = 'insert into session (id_session, time_start, time_end, web_ip, web_agent) values (%s, %s, %s, %s, %s)'
     val = (id_session, time_start, time_end, web_ip, web_agent)
     # работа с БД
     with db.cursor() as cursor:
@@ -71,7 +71,7 @@ def session_mobile_connect(id_session, mobile_ip, mobile_agent):
     # подключаемся к БД
     db = db_connector.create_connection()
     # описание запроса
-    query = 'UPDATE session SET mobile_ip = %s, mobile_agent = %s WHERE id = %s'
+    query = 'UPDATE session SET mobile_ip = %s, mobile_agent = %s WHERE id_session = %s'
     val = (mobile_ip, mobile_agent, id_session)
     # работа с БД
     with db.cursor() as cursor:
@@ -93,7 +93,7 @@ def get_session_info(id_session):
     # подключаемся к БД
     db = db_connector.create_connection()
     # описание запроса
-    query = 'SELECT * FROM session WHERE id = %s'
+    query = 'SELECT * FROM session WHERE id_session = %s'
     val = (id_session,)
     # работа с БД
     with db.cursor() as cursor:
@@ -127,7 +127,7 @@ def update_time_end(id_session):
     # подключаемся к БД
     db = db_connector.create_connection()
     # описание запроса
-    query = 'UPDATE session SET time_end = %s WHERE id = %s'
+    query = 'UPDATE session SET time_end = %s WHERE id_session = %s'
     val = (time_end, id_session)
     # работа с БД
     with db.cursor() as cursor:

@@ -34,7 +34,7 @@ def session_start():
     # сохраняем информацию в БД методом sessionStart
     session_controller.session_start(id_session, web_ip, web_agent)
     # возвращаем пользователю json с id
-    return jsonify(id=id_session)
+    return jsonify(id_session=id_session)
 
 
 @app.route("/session/mobile/connect", methods=['POST'])
@@ -45,7 +45,7 @@ def session_mobile_connect():
             return jsonify(error='Ошибка в параметрах запроса'), 400
         mobile_ip = request_data['mobile_ip']
         mobile_agent = request_data['mobile_agent']
-        id_session = request_data['id']
+        id_session = request_data['id_session']
         if mobile_ip == '' or mobile_agent == '' or id_session == '':
             return jsonify(error='Ошибка в параметрах запроса'), 400
     else:
@@ -71,7 +71,7 @@ def send_data():
         return jsonify(error='Файл отсутствует или ошибка получения файла'), 400
     # вытягиваем id_session и type из path запроса
 
-    id_session = request.args.get('id', '')
+    id_session = request.args.get('id_session', '')
     type_file = request.args.get('type', '')
     if id_session == '' or type_file == '':
         return jsonify(error='Ошибка в параметрах запроса'), 400
