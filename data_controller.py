@@ -1,9 +1,8 @@
 import os
+import main
 from datetime import datetime, timedelta
 
 import db_connector
-
-UPLOAD_FOLDER = 'D:\\000FileBox'
 
 
 # -----------------------------------
@@ -36,7 +35,7 @@ def send_data_db(id_session, type_file, file_name_real, file_name_fs):
 # return: -
 # -----------------------------------
 def send_data_fs(file_name_fs, file):
-    file_path = os.path.join(UPLOAD_FOLDER, file_name_fs)
+    file_path = os.path.join(main.UPLOAD_FOLDER, file_name_fs)
     file.save(file_path)
 
 

@@ -12,6 +12,7 @@ app.config['MAX_CONTENT_LENGTH'] = 100 * 1000 * 1000
 
 TYPE_FILES = ['text', 'file']
 STATUS_FILES = ['created', 'in process', 'loaded']
+UPLOAD_FOLDER = 'D:\\000FileBox'
 
 
 @app.route("/session/start", methods=['POST'])
