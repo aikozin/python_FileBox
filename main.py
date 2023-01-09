@@ -7,6 +7,11 @@ import data_controller
 import session_controller
 
 app = Flask(__name__)
+# ограничение размера файла в 100 МБ
+app.config['MAX_CONTENT_LENGTH'] = 100 * 1000 * 1000
+
+TYPE_FILES = ['text', 'file']
+STATUS_FILES = ['created', 'in process', 'loaded']
 
 
 @app.route("/session/start", methods=['POST'])
@@ -50,6 +55,8 @@ def session_mobile_connect():
             return jsonify(error='Ошибка в параметрах запроса'), 400
     else:
         return jsonify(error='Ошибка в параметрах запроса'), 400
+    if session_controller.check_free_id(id_session):
+        return jsonify(error='Такая сессия не существует'), 400
 
     session_controller.session_mobile_connect(id_session, mobile_ip, mobile_agent)
     session_controller.update_time_end(id_session)
@@ -65,16 +72,19 @@ def session_mobile_connect():
 @app.route("/data/send", methods=['POST'])
 def send_data():
     # получаем загружаемый файл
-    try:
-        file = request.files['file']
-    except:
+    if 'file' not in request.files:
         return jsonify(error='Файл отсутствует или ошибка получения файла'), 400
+    file = request.files['file']
     # вытягиваем id_session и type из path запроса
-
     id_session = request.args.get('id_session', '')
     type_file = request.args.get('type', '')
     if id_session == '' or type_file == '':
         return jsonify(error='Ошибка в параметрах запроса'), 400
+    if session_controller.check_free_id(id_session):
+        return jsonify(error='Такая сессия не существует'), 400
+    if type_file not in TYPE_FILES:
+        return jsonify(error='Тип файла не действителен'), 400
+
     # получаем настоящее имя файла
     file_name_real = file.filename
     # генерируем имя для файла в файловой системе из части id_session + uuid + расширение файла
@@ -90,9 +100,20 @@ def send_data():
 def check_data():
     # получаем json информацию от клиента в массив request_data
     request_data = request.get_json()
-    # вытягиваем из json id_session и status
-    id_session = request_data['id_session']
-    status = request_data['status']
+    if request_data:
+        if 'id_session' not in request_data or 'status' not in request_data:
+            return jsonify(error='Ошибка в параметрах запроса'), 400
+        id_session = request_data['id_session']
+        status = request_data['status']
+        if id_session == '' or status == '':
+            return jsonify(error='Ошибка в параметрах запроса'), 400
+    else:
+        return jsonify(error='Ошибка в параметрах запроса'), 400
+    if session_controller.check_free_id(id_session):
+        return jsonify(error='Такая сессия не существует'), 400
+    if status not in STATUS_FILES:
+        return jsonify(error='Статус файла не действителен'), 400
+
     # получаем массив файлов
     result = data_controller.get_files_info(id_session, status)
     # возвращаем пользователю json с массивом файлов files
