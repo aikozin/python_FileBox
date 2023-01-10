@@ -123,18 +123,11 @@ def check_data():
 
 @app.route("/data/get", methods=['GET'])
 def get_data():
-    request_data = request.get_json()
-    id_session = request_data['id_session']
-    id_file = request_data['id_file']
+    id_session = request.args.get('id_session', '')
+    id_file = request.args.get('id_file', '')
     # получаем из БД из таблицы data запись с полученным id и id_session
     file_info = data_controller.get_file_info(id_file, id_session)
-    # берем из результата поле file_name_fs и вытягиваем из папки 000FileBox файл с таким именем в питоновский объект file
-    a = send_file(os.path.join(UPLOAD_FOLDER, file_info['file_name_fs']), as_attachment=True, download_name=file_info['file_name_real'])
-    return a
-    # переименовываем этот файл в значение из поля file_name_real
-    # отправляем файл клиенту функцией Фласка send_from_directory или send_file (здесь разобраться что лучше использовать. Ссылки:
-
-
+    return send_file(os.path.join(UPLOAD_FOLDER, file_info['file_name_fs']), download_name=file_info['file_name_real'])
 
 
 if __name__ == "__main__":
