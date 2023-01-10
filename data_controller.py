@@ -46,7 +46,7 @@ def send_data_fs(file_name_fs, file):
 # param status: статус файла
 # return: массив файлов
 # -----------------------------------
-def get_files_info(id_session, status):
+def get_user_files_info(id_session, status):
     json = list()
     db = db_connector.create_connection()
     query = 'select * from data where id_session=%s and status=%s'
@@ -61,8 +61,31 @@ def get_files_info(id_session, status):
                 "file_name_real": row[3],
                 "file_name_fs": row[4],
                 "time_birth": row[5],
-                "time_death": row[6],
+                "time_death": row[6]
             }
             json.append(file)
+    db.close()
+    return json
+
+
+def get_file_info(id_file, id_session):
+    # подключаемся к БД
+    db = db_connector.create_connection()
+    # описание запроса
+    query = 'SELECT * FROM data where id_file = %s and id_session = %s'
+    val = (id_file, id_session)
+    # работа с БД
+    with db.cursor() as cursor:
+        # выполняем запрос
+        cursor.execute(query, val)
+        result = cursor.fetchone()
+        json = {
+            "type": result[2],
+            "file_name_real": result[3],
+            "file_name_fs": result[4],
+            "time_birth": result[5],
+            "time_death": result[6],
+            "status": result[7]
+        }
     db.close()
     return json
