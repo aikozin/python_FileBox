@@ -3,13 +3,14 @@ from datetime import datetime, timedelta
 import db_connector
 
 
-# -----------------------------------
-# Метод для проверки свободного ID сессии
-#
-# param id_session: ID сессии
-# return: true, если ID свободен
-# -----------------------------------
 def check_free_id(id_session):
+    """
+    Метод для проверки свободного ID сессии
+
+    :param id_session: ID сессии
+    :return: true, если ID свободен
+    """
+
     # думаем, что id не используется
     is_free_id = False
     # подключаемся к БД
@@ -31,15 +32,16 @@ def check_free_id(id_session):
     return is_free_id
 
 
-# -----------------------------------
-# Метод для старта сессии при подключении ПК к сайту
-#
-# param id: ID сессии
-# param web_ip: IP адрес ПК
-# param web_agent: информация о браузере клиента
-# return: -
-# -----------------------------------
 def session_start(id_session, web_ip, web_agent):
+    """
+    Метод для старта сессии при подключении ПК к сайту
+
+    :param id_session: ID сессии
+    :param web_ip: IP адрес ПК
+    :param web_agent: информация о браузере клиента
+    :return: -
+    """
+
     # подключаемся к БД
     db = db_connector.create_connection()
     # получаем текущее время
@@ -59,15 +61,16 @@ def session_start(id_session, web_ip, web_agent):
     db.close()
 
 
-# -----------------------------------
-# Метод для подключения телефона к сессии после сканирования QR-кода
-#
-# param id: ID сессии
-# param mobile_ip: IP адрес телефона
-# param mobile_agent: информация о системе телефона
-# return: -
-# -----------------------------------
 def session_mobile_connect(id_session, mobile_ip, mobile_agent):
+    """
+    Метод для подключения телефона к сессии после сканирования QR-кода
+
+    :param id_session: ID сессии
+    :param mobile_ip: IP адрес телефона
+    :param mobile_agent: информация о системе телефона
+    :return: -
+    """
+
     # подключаемся к БД
     db = db_connector.create_connection()
     # описание запроса
@@ -83,13 +86,14 @@ def session_mobile_connect(id_session, mobile_ip, mobile_agent):
     db.close()
 
 
-# -----------------------------------
-# Метод для получения всей информации о сессии
-#
-# param id: ID сессии
-# return: список с информацией о сессии
-# -----------------------------------
 def get_session_info(id_session):
+    """
+    Метод для получения всей информации о сессии
+
+    :param id_session: ID сессии
+    :return: список с информацией о сессии
+    """
+
     # подключаемся к БД
     db = db_connector.create_connection()
     # описание запроса
@@ -113,13 +117,14 @@ def get_session_info(id_session):
     return row
 
 
-# -----------------------------------
-# Метод для обновления времени закрытия сессии
-#
-# param id: ID сессии
-# return: -
-# -----------------------------------
 def update_time_end(id_session):
+    """
+    Метод для обновления времени закрытия сессии
+
+    :param id_session: ID сессии
+    :return: -
+    """
+
     # получаем текущее время
     time_current = datetime.now()
     # к текущему времени прибавляем 5 минут

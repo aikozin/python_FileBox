@@ -5,16 +5,17 @@ from datetime import datetime, timedelta
 import db_connector
 
 
-# -----------------------------------
-# Метод для обновления информации о данных в БД
-#
-# param id_session: ID сессии
-# param type_file: тип данных
-# param file_name_real: настоящее имя файла
-# param file_name_fs: имя файла в файловой системе
-# return: -
-# -----------------------------------
 def send_data_db(id_session, type_file, file_name_real, file_name_fs):
+    """
+    Метод для обновления информации о данных в БД
+
+    :param id_session: ID сессии
+    :param type_file: тип данных
+    :param file_name_real: настоящее имя файла
+    :param file_name_fs: имя файла в файловой системе
+    :return:
+    """
+
     db = db_connector.create_connection()
     time_start = datetime.now()
     time_end = time_start + timedelta(minutes=30)
@@ -27,26 +28,28 @@ def send_data_db(id_session, type_file, file_name_real, file_name_fs):
     db.close()
 
 
-# -----------------------------------
-# Сохранение данных в виде файла в файловой системе
-#
-# param file_name_fs: имя файла в файловой системе
-# param file: файл
-# return: -
-# -----------------------------------
 def send_data_fs(file_name_fs, file):
+    """
+    Сохранение данных в виде файла в файловой системе
+
+    :param file_name_fs: имя файла в файловой системе
+    :param file: файл
+    :return: -
+    """
+
     file_path = os.path.join(main.UPLOAD_FOLDER, file_name_fs)
     file.save(file_path)
 
 
-# -----------------------------------
-# Получение списка файлов с заданным id_session и status
-#
-# param id_session: ID сессии
-# param status: статус файла
-# return: массив файлов
-# -----------------------------------
 def get_user_files_info(id_session, status):
+    """
+    Получение списка файлов с заданным id_session и status
+
+    :param id_session: ID сессии
+    :param status: статус файла
+    :return: массив файлов
+    """
+
     json = list()
     db = db_connector.create_connection()
     query = 'select * from data where id_session=%s and status=%s'
@@ -69,6 +72,14 @@ def get_user_files_info(id_session, status):
 
 
 def get_file_info(id_file, id_session):
+    """
+    Получение информации о передаваемом файле с заданным id_file и id_session.
+
+    :param id_file: ID файла (целое число)
+    :param id_session: ID сессии
+    :return: json файл с атрибутами передаваемого файла
+    """
+
     # подключаемся к БД
     db = db_connector.create_connection()
     # описание запроса
