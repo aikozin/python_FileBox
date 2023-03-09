@@ -29,14 +29,17 @@ def session_start():
             return jsonify(error='Ошибка в параметрах запроса'), 400
     else:
         return jsonify(error='Ошибка в параметрах запроса'), 400
+    # генерируем id
+    id_session = str(uuid.uuid4())
 
     # бесконечный цикл
-    while True:
-        # генерируем id
-        id_session = str(uuid.uuid4())
-        # проверяем свободен ли id в БД, если свободен - выходим из цикла
-        if session_controller.check_free_id(id_session):
-            break
+    # while True:
+    #     # генерируем id
+    #     id_session = str(uuid.uuid4())
+    #     # проверяем свободен ли id в БД, если свободен - выходим из цикла
+    #     if session_controller.check_free_id(id_session):
+    #         break
+
     # сохраняем информацию в БД методом sessionStart
     session_controller.session_start(id_session, web_ip, web_agent)
     # возвращаем пользователю json с id
