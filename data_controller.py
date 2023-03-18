@@ -1,7 +1,6 @@
 import os
 import main
 from datetime import datetime, timedelta
-
 import db_connector
 
 

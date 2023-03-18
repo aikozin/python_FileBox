@@ -2,9 +2,10 @@ import os
 import uuid
 
 from flask import Flask, request, jsonify, send_file
-
+from multiprocessing import Process
 import data_controller
 import session_controller
+import utils.trash_collector
 
 app = Flask(__name__)
 app.config['MAX_CONTENT_LENGTH'] = 100 * 1000 * 1000  # ограничение размера файла в 100 МБ
@@ -130,3 +131,4 @@ def get_data():
 
 if __name__ == "__main__":
     app.run(debug=True)
+    utils.trash_collector.start()
