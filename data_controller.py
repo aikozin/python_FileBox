@@ -80,14 +80,10 @@ def get_file_info(id_file, id_session):
     :return: json файл с атрибутами передаваемого файла
     """
 
-    # подключаемся к БД
     db = db_connector.create_connection()
-    # описание запроса
     query = 'SELECT * FROM data where id_file = %s and id_session = %s'
     val = (id_file, id_session)
-    # работа с БД
     with db.cursor() as cursor:
-        # выполняем запрос
         cursor.execute(query, val)
         result = cursor.fetchone()
         json = {

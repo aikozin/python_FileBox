@@ -11,23 +11,15 @@ def check_free_id(id_session):
     :return: true, если ID свободен
     """
 
-    # думаем, что id не используется
     is_free_id = False
-    # подключаемся к БД
     db = db_connector.create_connection()
-    # описываем запрос и значения для него
     query = 'select * from session where id_session=%s'
     val = (str(id_session),)
-    # работа с БД
     with db.cursor() as cursor:
-        # выполняем запрос
         cursor.execute(query, val)
-        # результат запроса - в список
         result = cursor.fetchall()
-        # если длина ответа (количество строк) = 0 - думаем, что такой id не использовался
         if len(result) == 0:
             is_free_id = True
-    # закрываем коннект к БД
     db.close()
     return is_free_id
 
@@ -42,22 +34,14 @@ def session_start(id_session, web_ip, web_agent):
     :return: -
     """
 
-    # подключаемся к БД
     db = db_connector.create_connection()
-    # получаем текущее время
     time_start = datetime.now()
-    # к текущему времени прибавляем 5 минут
     time_end = time_start + timedelta(minutes=5)
-    # описываем запрос и значения для него
     query = 'insert into session (id_session, time_start, time_end, web_ip, web_agent) values (%s, %s, %s, %s, %s)'
     val = (id_session, time_start, time_end, web_ip, web_agent)
-    # работа с БД
     with db.cursor() as cursor:
-        # выполняем запрос
         cursor.execute(query, val)
-        # завершаем транзакцию
         db.commit()
-    # закрываем коннект к БД
     db.close()
 
 
@@ -71,18 +55,12 @@ def session_mobile_connect(id_session, mobile_ip, mobile_agent):
     :return: -
     """
 
-    # подключаемся к БД
     db = db_connector.create_connection()
-    # описание запроса
     query = 'UPDATE session SET mobile_ip = %s, mobile_agent = %s WHERE id_session = %s'
     val = (mobile_ip, mobile_agent, id_session)
-    # работа с БД
     with db.cursor() as cursor:
-        # выполняем запрос
         cursor.execute(query, val)
-        # завершаем транзакцию
         db.commit()
-    # закрываем коннект к БД
     db.close()
 
 
@@ -94,14 +72,10 @@ def get_session_info(id_session):
     :return: список с информацией о сессии
     """
 
-    # подключаемся к БД
     db = db_connector.create_connection()
-    # описание запроса
     query = 'SELECT * FROM session WHERE id_session = %s'
     val = (id_session,)
-    # работа с БД
     with db.cursor() as cursor:
-        # выполняем запрос
         cursor.execute(query, val)
         result = cursor.fetchone()
         row = {
@@ -125,20 +99,12 @@ def update_time_end(id_session):
     :return: -
     """
 
-    # получаем текущее время
     time_current = datetime.now()
-    # к текущему времени прибавляем 5 минут
     time_end = time_current + timedelta(minutes=5)
-    # подключаемся к БД
     db = db_connector.create_connection()
-    # описание запроса
     query = 'UPDATE session SET time_end = %s WHERE id_session = %s'
     val = (time_end, id_session)
-    # работа с БД
     with db.cursor() as cursor:
-        # выполняем запрос
         cursor.execute(query, val)
-        # завершаем транзакцию
         db.commit()
-    # закрываем коннект к БД
     db.close()
