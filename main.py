@@ -2,10 +2,11 @@ import os
 import uuid
 
 from flask import Flask, request, jsonify, send_file
-from multiprocessing import Process
 import data_controller
 import session_controller
-import utils.trash_collector
+import db_connector
+import threading
+from datetime import time
 
 app = Flask(__name__)
 app.config['MAX_CONTENT_LENGTH'] = 100 * 1000 * 1000  # ограничение размера файла в 100 МБ
@@ -27,7 +28,7 @@ def session_start():
             return jsonify(error='Ошибка в параметрах запроса'), 400
         web_ip = request_data['web_ip']
         web_agent = request_data['web_agent']
-        if web_ip == '' or web_agent == '':
+        if not web_ip or not web_agent:
             return jsonify(error='Ошибка в параметрах запроса'), 400
     else:
         return jsonify(error='Ошибка в параметрах запроса'), 400
@@ -49,7 +50,7 @@ def session_mobile_connect():
         mobile_ip = request_data['mobile_ip']
         mobile_agent = request_data['mobile_agent']
         id_session = request_data['id_session']
-        if mobile_ip == '' or mobile_agent == '' or id_session == '':
+        if not mobile_ip or not mobile_agent or not id_session:
             return jsonify(error='Ошибка в параметрах запроса'), 400
     else:
         return jsonify(error='Ошибка в параметрах запроса'), 400
@@ -78,7 +79,7 @@ def send_data():
     file = request.files['file']
     id_session = request.args.get('id_session', '')
     type_file = request.args.get('type', '')
-    if id_session == '' or type_file == '':
+    if not id_session or not type_file:
         return jsonify(error='Ошибка в параметрах запроса'), 400
     if session_controller.check_free_id(id_session):
         return jsonify(error='Такая сессия не существует'), 400
@@ -104,7 +105,7 @@ def check_data():
             return jsonify(error='Ошибка в параметрах запроса'), 400
         id_session = request_data['id_session']
         status = request_data['status']
-        if id_session == '' or status == '':
+        if not id_session or not status:
             return jsonify(error='Ошибка в параметрах запроса'), 400
     else:
         return jsonify(error='Ошибка в параметрах запроса'), 400
@@ -129,6 +130,48 @@ def get_data():
     return send_file(os.path.join(UPLOAD_FOLDER, file_info['file_name_fs']), download_name=file_info['file_name_real'])
 
 
+class TrashCollector(threading.Thread):
+    def __init__(self):
+        super().__init__()
+        self.stop = threading.Event()
+
+    def run(self):
+        while not self.stop.wait(10):
+            proc_to_call()
+
+
+def proc_to_call():
+    print('trash_collector in progress...', time)
+    db = db_connector.create_connection()
+    query = 'SELECT id_session FROM session WHERE now() > time_end'
+    with db.cursor() as cursor:
+        cursor.execute(query)
+        deletes_sessions = tuple((id_session for id_session in cursor.fetchall()))
+
+    data_query = 'SELECT file_name_fs FROM data WHERE id_session = %s'
+    deletes_data = set()
+    for value in deletes_sessions:
+        with db.cursor() as cursor:
+            cursor.execute(data_query, value)
+            # deletes_data.add(*cursor.fetchall())
+            [deletes_data.add(name) for name in cursor.fetchall()]
+    data_query = 'SELECT file_name_fs FROM data WHERE now() > time_death'
+    with db.cursor() as cursor:
+        cursor.execute(data_query)
+        [deletes_data.add(name) for name in cursor.fetchall()]
+
+    session_query = 'DELETE FROM session WHERE id_session = %s'
+    for value in deletes_sessions:
+        with db.cursor() as cursor:
+            cursor.execute(session_query, value)
+            db.commit()
+    db.close()
+    [os.remove(*file_path) for file_path in deletes_data if os.path.exists(*file_path)]
+    return deletes_sessions
+
+
+trash_collector = TrashCollector()
+
 if __name__ == "__main__":
+    trash_collector.start()
     app.run(debug=True)
-    utils.trash_collector.start()
