@@ -1,6 +1,7 @@
 import os
 import db_connector
 import threading
+from datetime import datetime
 
 
 class TrashCollector(threading.Thread):
@@ -10,10 +11,11 @@ class TrashCollector(threading.Thread):
 
     def run(self):
         while not self.stop.wait(10):
-            proc_to_call()
+            trash_proc()
 
 
-def proc_to_call():
+def trash_proc():
+    print(f'\ntrash_collector in progress...{datetime.now()}')  # {datetime.now():%y-%m-%d %H:%M:%S}
     db = db_connector.create_connection()
     query = 'SELECT id_session FROM session WHERE now() > time_end'
     with db.cursor() as cursor:
@@ -39,8 +41,10 @@ def proc_to_call():
             db.commit()
     db.close()
     [os.remove(*file_path) for file_path in deletes_data if os.path.exists(*file_path)]
+    return print(f'\nSessions deleted: {deletes_sessions}{datetime.now()}' if deletes_sessions
+                 else f'\nNothing was deleted...{datetime.now()}')
 
 
-def start():
-    trash_collector = TrashCollector()
-    trash_collector.start()
+# def start():
+#     trash_collector = TrashCollector()
+#     trash_collector.start()
