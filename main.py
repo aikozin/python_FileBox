@@ -2,9 +2,9 @@ import os
 import uuid
 
 from flask import Flask, request, jsonify, send_file
-
 import data_controller
 import session_controller
+from utils.trash_collector import TrashCollector
 
 app = Flask(__name__)
 app.config['MAX_CONTENT_LENGTH'] = 100 * 1000 * 1000  # ограничение размера файла в 100 МБ
@@ -12,6 +12,7 @@ app.config['MAX_CONTENT_LENGTH'] = 100 * 1000 * 1000  # ограничение �
 TYPE_FILES = ['text', 'file']
 STATUS_FILES = ['created', 'in process', 'loaded']
 UPLOAD_FOLDER = 'D:\\000FileBox'
+trash_collector = TrashCollector()
 
 
 @app.route("/session/start", methods=['POST'])
@@ -26,7 +27,7 @@ def session_start():
             return jsonify(error='Ошибка в параметрах запроса'), 400
         web_ip = request_data['web_ip']
         web_agent = request_data['web_agent']
-        if web_ip == '' or web_agent == '':
+        if not web_ip or not web_agent:
             return jsonify(error='Ошибка в параметрах запроса'), 400
     else:
         return jsonify(error='Ошибка в параметрах запроса'), 400
@@ -48,7 +49,7 @@ def session_mobile_connect():
         mobile_ip = request_data['mobile_ip']
         mobile_agent = request_data['mobile_agent']
         id_session = request_data['id_session']
-        if mobile_ip == '' or mobile_agent == '' or id_session == '':
+        if not mobile_ip or not mobile_agent or not id_session:
             return jsonify(error='Ошибка в параметрах запроса'), 400
     else:
         return jsonify(error='Ошибка в параметрах запроса'), 400
@@ -77,7 +78,7 @@ def send_data():
     file = request.files['file']
     id_session = request.args.get('id_session', '')
     type_file = request.args.get('type', '')
-    if id_session == '' or type_file == '':
+    if not id_session or not type_file:
         return jsonify(error='Ошибка в параметрах запроса'), 400
     if session_controller.check_free_id(id_session):
         return jsonify(error='Такая сессия не существует'), 400
@@ -103,7 +104,7 @@ def check_data():
             return jsonify(error='Ошибка в параметрах запроса'), 400
         id_session = request_data['id_session']
         status = request_data['status']
-        if id_session == '' or status == '':
+        if not id_session or not status:
             return jsonify(error='Ошибка в параметрах запроса'), 400
     else:
         return jsonify(error='Ошибка в параметрах запроса'), 400
@@ -129,4 +130,5 @@ def get_data():
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    trash_collector.start()
+    app.run(debug=False)
