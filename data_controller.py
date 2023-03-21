@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 import db_connector
 
 
-def send_data_db(id_session, type_file, file_name_real, file_name_fs):
+def send_data_db(id_session, type_file, file_name_real, file_name_fs, source):
     """
     Метод для обновления информации о данных в БД
 
@@ -12,15 +12,16 @@ def send_data_db(id_session, type_file, file_name_real, file_name_fs):
     :param type_file: тип данных
     :param file_name_real: настоящее имя файла
     :param file_name_fs: имя файла в файловой системе
+    :param source: фиксированное значение источника файла WEB или MOBILE
     :return:
     """
 
     db = db_connector.create_connection()
     time_start = datetime.now()
     time_end = time_start + timedelta(minutes=30)
-    query = 'insert into data (id_session, type, file_name_real, file_name_fs, time_birth, time_death, status) ' \
-            'values (%s, %s, %s, %s, %s, %s, %s)'
-    val = (id_session, type_file, file_name_real, file_name_fs, time_start, time_end, 'created')
+    query = 'insert into data (id_session, type, file_name_real, file_name_fs, time_birth, time_death, status, ' \
+            'source) values (%s, %s, %s, %s, %s, %s, %s, %s)'
+    val = (id_session, type_file, file_name_real, file_name_fs, time_start, time_end, 'created', source)
     with db.cursor() as cursor:
         cursor.execute(query, val)
         db.commit()
