@@ -56,7 +56,7 @@ def session_mobile_connect():
     else:
         return jsonify(error='Error in request parameters'), 400
     if session_controller.check_free_id(id_session):
-        return jsonify(error='Session with such id does not exist'), 400
+        return jsonify(error='Session with such ID does not exist'), 400
 
     session_controller.session_mobile_connect(id_session, mobile_ip, mobile_agent)
     session_controller.update_time_end(id_session)
