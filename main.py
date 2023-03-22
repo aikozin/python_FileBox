@@ -11,7 +11,9 @@ app.config['MAX_CONTENT_LENGTH'] = 100 * 1000 * 1000  # ограничение �
 
 TYPE_FILES = ['text', 'file']
 STATUS_FILES = ['created', 'in process', 'loaded']
+SOURCE_FILES = ('WEB', 'MOBILE')
 UPLOAD_FOLDER = 'D:\\000FileBox'
+
 trash_collector = TrashCollector()
 
 
@@ -78,16 +80,19 @@ def send_data():
     file = request.files['file']
     id_session = request.args.get('id_session', '')
     type_file = request.args.get('type', '')
-    if not id_session or not type_file:
+    source = request.args.get('source', '')
+    if not id_session or not type_file or not source:
         return jsonify(error='Ошибка в параметрах запроса'), 400
     if session_controller.check_free_id(id_session):
         return jsonify(error='Такая сессия не существует'), 400
     if type_file not in TYPE_FILES:
         return jsonify(error='Тип файла не действителен'), 400
+    if source not in SOURCE_FILES:
+        return jsonify(error='Тип источника файла не действителен'), 400
 
     file_name_real = file.filename
     file_name_fs = id_session[:5] + str(uuid.uuid4()) + os.path.splitext(file_name_real)[1]
-    data_controller.send_data_db(id_session, type_file, file_name_real, file_name_fs)
+    data_controller.send_data_db(id_session, type_file, file_name_real, file_name_fs, source)
     data_controller.send_data_fs(file_name_fs, file)
     return '', 200
 
