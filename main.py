@@ -26,13 +26,13 @@ def session_start():
     request_data = request.get_json()
     if request_data:
         if 'web_ip' not in request_data or 'web_agent' not in request_data:
-            return jsonify(error='Ошибка в параметрах запроса'), 400
+            return jsonify(error='Error in request parameters'), 400
         web_ip = request_data['web_ip']
         web_agent = request_data['web_agent']
         if not web_ip or not web_agent:
-            return jsonify(error='Ошибка в параметрах запроса'), 400
+            return jsonify(error='Error in request parameters'), 400
     else:
-        return jsonify(error='Ошибка в параметрах запроса'), 400
+        return jsonify(error='Error in request parameters'), 400
     id_session = str(uuid.uuid4())
     session_controller.session_start(id_session, web_ip, web_agent)
     return jsonify(id_session=id_session)
@@ -47,16 +47,16 @@ def session_mobile_connect():
     request_data = request.get_json()
     if request_data:
         if 'mobile_ip' not in request_data or 'mobile_agent' not in request_data or 'id_session' not in request_data:
-            return jsonify(error='Ошибка в параметрах запроса'), 400
+            return jsonify(error='Error in request parameters'), 400
         mobile_ip = request_data['mobile_ip']
         mobile_agent = request_data['mobile_agent']
         id_session = request_data['id_session']
         if not mobile_ip or not mobile_agent or not id_session:
-            return jsonify(error='Ошибка в параметрах запроса'), 400
+            return jsonify(error='Error in request parameters'), 400
     else:
-        return jsonify(error='Ошибка в параметрах запроса'), 400
+        return jsonify(error='Error in request parameters'), 400
     if session_controller.check_free_id(id_session):
-        return jsonify(error='Такая сессия не существует'), 400
+        return jsonify(error='Session with such id does not exist'), 400
 
     session_controller.session_mobile_connect(id_session, mobile_ip, mobile_agent)
     session_controller.update_time_end(id_session)
@@ -76,19 +76,19 @@ def send_data():
     """
 
     if 'file' not in request.files:
-        return jsonify(error='Файл отсутствует или ошибка получения файла'), 400
+        return jsonify(error='File missing or error getting file'), 400
     file = request.files['file']
     id_session = request.args.get('id_session', '')
     type_file = request.args.get('type', '')
     source = request.args.get('source', '')
     if not id_session or not type_file or not source:
-        return jsonify(error='Ошибка в параметрах запроса'), 400
+        return jsonify(error='Error in request parameters'), 400
     if session_controller.check_free_id(id_session):
-        return jsonify(error='Такая сессия не существует'), 400
+        return jsonify(error='Session with such ID does not exist'), 400
     if type_file not in TYPE_FILES:
-        return jsonify(error='Тип файла не действителен'), 400
+        return jsonify(error='Invalid file type'), 400
     if source not in SOURCE_FILES:
-        return jsonify(error='Тип источника файла не действителен'), 400
+        return jsonify(error='Invalid file source type'), 400
 
     file_name_real = file.filename
     file_name_fs = id_session[:5] + str(uuid.uuid4()) + os.path.splitext(file_name_real)[1]
