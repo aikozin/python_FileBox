@@ -1,20 +1,13 @@
 import os
 import uuid
-
 from flask import Flask, request, jsonify, send_file
 import data_controller
 import session_controller
-from utils.trash_collector import TrashCollector
+from utils.trash_collector import trash_collector
+from configuration import config
 
 app = Flask(__name__)
-app.config['MAX_CONTENT_LENGTH'] = 100 * 1000 * 1000  # ограничение размера файла в 100 МБ
-
-TYPE_FILES = ['text', 'file']
-STATUS_FILES = ['created', 'in process', 'loaded']
-SOURCE_FILES = ('WEB', 'MOBILE')
-UPLOAD_FOLDER = 'D:\\000FileBox'
-
-trash_collector = TrashCollector()
+app.config.from_object(config)
 
 
 @app.route("/session/start", methods=['POST'])
@@ -62,7 +55,7 @@ def session_mobile_connect():
     session_controller.update_time_end(id_session)
     session = session_controller.get_session_info(id_session)
     return jsonify(
-        time_start=session['time_start'],
+        time_start=str(session['time_start']),
         time_end=session['time_end'],
         web_ip=session['web_ip'],
         web_agent=session['web_agent']
@@ -85,9 +78,9 @@ def send_data():
         return jsonify(error='Error in request parameters'), 400
     if session_controller.check_free_id(id_session):
         return jsonify(error='Session with such ID does not exist'), 400
-    if type_file not in TYPE_FILES:
+    if type_file not in config.TYPE_FILES:
         return jsonify(error='Invalid file type'), 400
-    if source not in SOURCE_FILES:
+    if source not in config.SOURCE_FILES:
         return jsonify(error='Invalid file source type'), 400
 
     file_name_real = file.filename
@@ -115,7 +108,7 @@ def check_data():
         return jsonify(error='Ошибка в параметрах запроса'), 400
     if session_controller.check_free_id(id_session):
         return jsonify(error='Такая сессия не существует'), 400
-    if status not in STATUS_FILES:
+    if status not in config.STATUS_FILES:
         return jsonify(error='Статус файла не действителен'), 400
 
     result = data_controller.get_user_files_info(id_session, status)
@@ -131,9 +124,10 @@ def get_data():
     id_session = request.args.get('id_session', '')
     id_file = request.args.get('id_file', '')
     file_info = data_controller.get_file_info(id_file, id_session)
-    return send_file(os.path.join(UPLOAD_FOLDER, file_info['file_name_fs']), download_name=file_info['file_name_real'])
+    return send_file(os.path.join(config.UPLOAD_FOLDER, file_info['file_name_fs']),
+                     download_name=file_info['file_name_real'])
 
 
 if __name__ == "__main__":
     trash_collector.start()
-    app.run(debug=False)
+    app.run()

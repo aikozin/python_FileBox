@@ -1,5 +1,5 @@
 import os
-import main
+from configuration import config
 from datetime import datetime, timedelta
 import db_connector
 
@@ -37,7 +37,7 @@ def send_data_fs(file_name_fs, file):
     :return: -
     """
 
-    file_path = os.path.join(main.UPLOAD_FOLDER, file_name_fs)
+    file_path = os.path.join(config.UPLOAD_FOLDER, file_name_fs)
     file.save(file_path)
 
 
