@@ -56,7 +56,7 @@ def session_mobile_connect():
     session = session_controller.get_session_info(id_session)
     return jsonify(
         time_start=str(session['time_start']),
-        time_end=session['time_end'],
+        time_end=str(session['time_end']),
         web_ip=session['web_ip'],
         web_agent=session['web_agent']
     )
@@ -122,7 +122,7 @@ def get_data():
     """
 
     id_session = request.args.get('id_session', '')
-    id_file = request.args.get('id_file', '')
+    id_file = request.args.get('id', '')
     file_info = data_controller.get_file_info(id_file, id_session)
     return send_file(os.path.join(config.UPLOAD_FOLDER, file_info['file_name_fs']),
                      download_name=file_info['file_name_real'])
