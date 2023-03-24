@@ -1,5 +1,5 @@
 import os
-import main
+from configuration import config
 from datetime import datetime, timedelta
 import db_connector
 
@@ -37,7 +37,7 @@ def send_data_fs(file_name_fs, file):
     :return: -
     """
 
-    file_path = os.path.join(main.UPLOAD_FOLDER, file_name_fs)
+    file_path = os.path.join(config.UPLOAD_FOLDER, file_name_fs)
     file.save(file_path)
 
 
@@ -63,8 +63,8 @@ def get_user_files_info(id_session, status):
                 "type": row[2],
                 "file_name_real": row[3],
                 "file_name_fs": row[4],
-                "time_birth": row[5],
-                "time_death": row[6]
+                "time_birth": str(row[5]),
+                "time_death": str(row[6])
             }
             json.append(file)
     db.close()
@@ -81,7 +81,7 @@ def get_file_info(id_file, id_session):
     """
 
     db = db_connector.create_connection()
-    query = 'SELECT * FROM data where id_file = %s and id_session = %s'
+    query = 'SELECT * FROM data where id = %s and id_session = %s'
     val = (id_file, id_session)
     with db.cursor() as cursor:
         cursor.execute(query, val)
@@ -90,8 +90,8 @@ def get_file_info(id_file, id_session):
             "type": result[2],
             "file_name_real": result[3],
             "file_name_fs": result[4],
-            "time_birth": result[5],
-            "time_death": result[6],
+            "time_birth": str(result[5]),
+            "time_death": str(result[6]),
             "status": result[7]
         }
     db.close()

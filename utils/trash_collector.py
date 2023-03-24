@@ -2,7 +2,7 @@ import os
 import db_connector
 import threading
 from datetime import datetime
-import main
+from configuration import config
 
 
 class TrashCollector(threading.Thread):
@@ -46,8 +46,11 @@ def trash_proc():
         db.close()
 
     if deletes_data:
-        [os.remove(os.path.join(main.UPLOAD_FOLDER, file_name_fs)) for file_name_fs in deletes_data
-         if os.path.exists(os.path.join(main.UPLOAD_FOLDER, file_name_fs))]
+        [os.remove(os.path.join(config.UPLOAD_FOLDER, file_name_fs)) for file_name_fs in deletes_data
+         if os.path.exists(os.path.join(config.UPLOAD_FOLDER, file_name_fs))]
     #     print(f'Files deleted: {deletes_data}')
     # return print(f'\nSessions deleted: {deletes_sessions}{datetime.now()}' if deletes_sessions
     #              else f'\nNothing was deleted...{datetime.now()}')
+
+
+trash_collector = TrashCollector()
