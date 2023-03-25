@@ -11,6 +11,7 @@ class Config:
         self.STATUS_FILES = default_config['STATUS_FILES']
         self.SOURCE_FILES = default_config['SOURCE_FILES']
         self.UPLOAD_FOLDER = default_config['UPLOAD_FOLDER']
+        self.LIFE_TIME = default_config['LIFE_TIME']
         self.HOST = default_config['DATABASE']['HOST']
         self.NAME = default_config['DATABASE']['NAME']
         self.USER = default_config['DATABASE']['USER']

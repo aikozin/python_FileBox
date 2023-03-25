@@ -1,6 +1,7 @@
 import os
 import uuid
 from flask import Flask, request, jsonify, send_file
+import db_connector
 import data_controller
 import session_controller
 from utils.trash_collector import trash_collector
@@ -128,6 +129,30 @@ def get_data():
                      download_name=file_info['file_name_real'])
 
 
+@app.route("/session/keep_alive", methods=['POST'])
+def keep_alive():
+    """
+    https://wiki.yandex.ru/homepage/moduli/rest-api/sessionkeep-alive/
+    """
+    request_data = request.get_json()
+    if not request_data or 'id_session' not in request_data:
+        return jsonify(error='Error in request parameters'), 400
+    id_session = request_data['id_session']
+    if not id_session:
+        return jsonify(error='Error in request parameters'), 400
+    db = db_connector.create_connection()
+    query = 'SELECT id_session FROM session WHERE id_session = %s and removal_flag = False'
+    val = (id_session,)
+    with db.cursor() as cursor:
+        cursor.execute(query, val)
+        result = cursor.fetchall()
+    db.close()
+    if not result:
+        return jsonify(error='Session with such ID does not exist'), 400
+    session_controller.keep_alive(id_session)
+    return '', 200
+
+
 if __name__ == "__main__":
-    trash_collector.start()
+    # trash_collector.start()
     app.run()

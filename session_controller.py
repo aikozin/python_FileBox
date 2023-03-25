@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+from configuration import config
 
 import db_connector
 
@@ -106,5 +107,19 @@ def update_time_end(id_session):
     val = (time_end, id_session)
     with db.cursor() as cursor:
         cursor.execute(query, val)
+        db.commit()
+    db.close()
+
+
+def keep_alive(id_session):
+    time_end = datetime.now() + timedelta(minutes=config.LIFE_TIME)
+    db = db_connector.create_connection()
+    query_to_session = 'UPDATE session SET time_end = %s WHERE id_session = %s'
+    query_to_data = 'UPDATE data SET time_death = %s WHERE id_session = %s'
+    values = (time_end, id_session)
+    with db.cursor() as cursor:
+        cursor.execute(query_to_session, values)
+        db.commit()
+        cursor.execute(query_to_data, values)
         db.commit()
     db.close()
