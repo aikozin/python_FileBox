@@ -128,6 +128,24 @@ def get_data():
                      download_name=file_info['file_name_real'])
 
 
+@app.route("/session/keep_alive", methods=['POST'])
+def keep_alive():
+    """
+    https://wiki.yandex.ru/homepage/moduli/rest-api/sessionkeep-alive/
+    """
+    request_data = request.get_json()
+    if not request_data or 'id_session' not in request_data:
+        return jsonify(error='Error in request parameters'), 400
+    id_session = request_data['id_session']
+    if not id_session:
+        return jsonify(error='Error in request parameters'), 400
+    result = session_controller.session_is_alive(id_session)
+    if not result:
+        return jsonify(error='Session with such ID does not exist'), 400
+    session_controller.keep_alive(id_session)
+    return '', 200
+
+
 if __name__ == "__main__":
     trash_collector.start()
     app.run()

@@ -11,6 +11,8 @@ class Config:
         self.STATUS_FILES = default_config['STATUS_FILES']
         self.SOURCE_FILES = default_config['SOURCE_FILES']
         self.UPLOAD_FOLDER = default_config['UPLOAD_FOLDER']
+        self.LIFE_TIME = default_config['LIFE_TIME']
+        self.TRASH_COLLECTOR_INTERVAL = default_config['TRASH_COLLECTOR_INTERVAL']
         self.HOST = default_config['DATABASE']['HOST']
         self.NAME = default_config['DATABASE']['NAME']
         self.USER = default_config['DATABASE']['USER']
@@ -20,7 +22,7 @@ class Config:
         with open(local_config, 'r') as f:
             local_config = json.load(f)
         for key, value in local_config.items():
-            if type(value) is dict:
+            if isinstance(value, dict):
                 for nested_key, nested_value in value.items():
                     setattr(self, nested_key, nested_value)
             else:
