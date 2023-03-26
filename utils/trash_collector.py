@@ -11,7 +11,7 @@ class TrashCollector(threading.Thread):
         self.stop = threading.Event()
 
     def run(self):
-        while not self.stop.wait(15):
+        while not self.stop.wait(config.TRASH_COLLECTOR_INTERVAL):
             trash_proc()
 
 
