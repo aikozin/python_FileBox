@@ -1,7 +1,6 @@
 import os
 import uuid
 from flask import Flask, request, jsonify, send_file
-import db_connector
 import data_controller
 import session_controller
 from utils.trash_collector import trash_collector
@@ -140,13 +139,7 @@ def keep_alive():
     id_session = request_data['id_session']
     if not id_session:
         return jsonify(error='Error in request parameters'), 400
-    db = db_connector.create_connection()
-    query = 'SELECT id_session FROM session WHERE id_session = %s and removal_flag = False'
-    val = (id_session,)
-    with db.cursor() as cursor:
-        cursor.execute(query, val)
-        result = cursor.fetchall()
-    db.close()
+    result = session_controller.session_is_alive(id_session)
     if not result:
         return jsonify(error='Session with such ID does not exist'), 400
     session_controller.keep_alive(id_session)
@@ -154,5 +147,5 @@ def keep_alive():
 
 
 if __name__ == "__main__":
-    # trash_collector.start()
+    trash_collector.start()
     app.run()

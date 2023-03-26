@@ -21,7 +21,7 @@ class Config:
         with open(local_config, 'r') as f:
             local_config = json.load(f)
         for key, value in local_config.items():
-            if type(value) is dict:
+            if isinstance(value, dict):
                 for nested_key, nested_value in value.items():
                     setattr(self, nested_key, nested_value)
             else:

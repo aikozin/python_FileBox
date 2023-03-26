@@ -14,7 +14,7 @@ def check_free_id(id_session):
 
     is_free_id = False
     db = db_connector.create_connection()
-    query = 'select * from session where id_session=%s'
+    query = 'SELECT * FROM session WHERE id_session=%s'
     val = (str(id_session),)
     with db.cursor() as cursor:
         cursor.execute(query, val)
@@ -111,7 +111,27 @@ def update_time_end(id_session):
     db.close()
 
 
+def session_is_alive(id_session):
+    """
+    Метод проверяет актуальность сессии - наличие записи с полученным ID и ложность её флага на удаление
+
+    :param id_session: ID сессии
+    :return: bool (True при выполнении условия проверки)
+    """
+    db = db_connector.create_connection()
+    query = 'SELECT id_session FROM session WHERE id_session=%s and removal_flag=False'
+    val = (id_session,)
+    with db.cursor() as cursor:
+        cursor.execute(query, val)
+        result = cursor.fetchall()
+    db.close()
+    return (False, True)[len(result)]
+
+
 def keep_alive(id_session):
+    """
+    https://wiki.yandex.ru/homepage/moduli/rest-api/sessionkeep-alive/
+    """
     time_end = datetime.now() + timedelta(minutes=config.LIFE_TIME)
     db = db_connector.create_connection()
     query_to_session = 'UPDATE session SET time_end = %s WHERE id_session = %s'
