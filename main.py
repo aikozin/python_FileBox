@@ -146,6 +146,21 @@ def keep_alive():
     return '', 200
 
 
+@app.route("/data/get", methods=['GET'])
+def get_data():
+    id_session = request.args.get('id_session', '')
+    id_file = request.args.get('id_file', '')
+    if not id_session or not id_file:
+        return jsonify(error='Error in request parameters'), 400
+    if session_controller.check_free_id(id_session):
+        return jsonify(error='Session with such ID does not exist'), 400
+    file_info = data_controller.get_file_info(id_file, id_session)
+    if not file_info:
+        return jsonify(error='File not found'), 400
+    return send_file(os.path.join(config.UPLOAD_FOLDER, file_info.get('file_name_fs')),
+                     download_name=file_info.get('file_name_real'))
+
+
 if __name__ == "__main__":
     trash_collector.start()
     app.run()
