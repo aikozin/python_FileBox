@@ -18,7 +18,7 @@ def send_data_db(id_session, type_file, file_name_real, file_name_fs, source):
 
     db = db_connector.create_connection()
     time_start = datetime.now()
-    time_end = time_start + timedelta(minutes=30)
+    time_end = time_start + timedelta(minutes=config.LIFE_TIME)
     query = 'insert into data (id_session, type, file_name_real, file_name_fs, time_birth, time_death, status, ' \
             'source) values (%s, %s, %s, %s, %s, %s, %s, %s)'
     val = (id_session, type_file, file_name_real, file_name_fs, time_start, time_end, 'created', source)
