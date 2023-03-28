@@ -44,6 +44,7 @@ def session_mobile_connect():
         mobile_ip = request_data['mobile_ip']
         mobile_agent = request_data['mobile_agent']
         id_session = request_data['id_session']
+        infinity = request_data.get('infinity')
         if not mobile_ip or not mobile_agent or not id_session:
             return jsonify(error='Error in request parameters'), 400
     else:
@@ -52,7 +53,7 @@ def session_mobile_connect():
         return jsonify(error='Session with such ID does not exist'), 400
 
     session_controller.session_mobile_connect(id_session, mobile_ip, mobile_agent)
-    session_controller.update_time_end(id_session)
+    session_controller.update_time_end(id_session, infinity)
     session = session_controller.get_session_info(id_session)
     return jsonify(
         time_start=str(session['time_start']),
