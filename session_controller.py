@@ -92,19 +92,18 @@ def get_session_info(id_session):
     return row
 
 
-def update_time_end(id_session, infinity=None):
+def update_time_end(id_session, infinity=False):
     """
     Метод для обновления времени закрытия сессии
 
     :param id_session: ID сессии
-    :param infinity: параметр для установки бесконечной времени жизни сессии
+    :param infinity: параметр для установки бесконечной времени жизни сессии, значение по умолчанию - False
     :return: -
     """
     current_time = datetime.now()
+    time_end = current_time + timedelta(minutes=config.LIFE_TIME)
     if infinity:
         time_end = current_time + timedelta(days=config.INFINITY_LIFE_TIME)
-    else:
-        time_end = current_time + timedelta(minutes=config.LIFE_TIME)
     query = 'UPDATE session SET time_end = %s WHERE id_session = %s'
     db = db_connector.create_connection()
     val = (time_end, id_session)
