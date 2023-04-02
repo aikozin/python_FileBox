@@ -12,6 +12,7 @@ class Config:
         self.SOURCE_FILES = default_config['SOURCE_FILES']
         self.UPLOAD_FOLDER = default_config['UPLOAD_FOLDER']
         self.LIFE_TIME = default_config['LIFE_TIME']
+        self.INFINITY_LIFE_TIME = default_config['INFINITY_LIFE_TIME']
         self.TRASH_COLLECTOR_INTERVAL = default_config['TRASH_COLLECTOR_INTERVAL']
         self.HOST = default_config['DATABASE']['HOST']
         self.NAME = default_config['DATABASE']['NAME']
