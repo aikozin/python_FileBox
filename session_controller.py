@@ -143,3 +143,15 @@ def keep_alive(id_session):
         cursor.execute(query_to_data, values)
         db.commit()
     db.close()
+
+
+def session_close(id_session):
+    """
+    https://wiki.yandex.ru/homepage/moduli/rest-api/sessionclose---zakrytie-sessii-po-zhelaniju-klient/
+    """
+    query = 'UPDATE session SET time_end=%s, removal_flag=True WHERE id_session=%s'
+    db = db_connector.create_connection()
+    with db.cursor() as cursor:
+        cursor.execute(query, id_session)
+        db.commit()
+    db.close()
