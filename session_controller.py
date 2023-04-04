@@ -56,7 +56,7 @@ def session_mobile_connect(id_session, mobile_ip, mobile_agent):
     :return: -
     """
 
-    query = 'UPDATE session SET mobile_ip=%s, mobile_agent=%s, WHERE id_session=%s'
+    query = 'UPDATE session SET mobile_ip=%s, mobile_agent=%s WHERE id_session=%s'
     db = db_connector.create_connection()
     val = (mobile_ip, mobile_agent, id_session)
     with db.cursor() as cursor:
