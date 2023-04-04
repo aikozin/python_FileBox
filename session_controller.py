@@ -157,3 +157,14 @@ def session_close(id_session):
         cursor.execute(query, id_session)
         db.commit()
     db.close()
+
+
+def on_connect(id_session, device_sid, device_type):
+    query = 'INSERT INTO client_sockets (id_session, sid_%s) VALUES (%s, %s) ' \
+            'ON DUPLICATE KEY UPDATE sid_%s = %s'
+    values = (device_type, id_session, device_sid, device_type, device_sid)
+    db = db_connector.create_connection()
+    with db.cursor() as cursor:
+        cursor.execute(query, values)
+        db.commit()
+    db.close()

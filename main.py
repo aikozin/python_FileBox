@@ -1,6 +1,7 @@
 import os
 import uuid
 from flask import Flask, request, jsonify, send_file
+from flask_socketio import SocketIO
 import data_controller
 import session_controller
 from utils.trash_collector import trash_collector
@@ -8,6 +9,7 @@ from configuration import config
 
 app = Flask(__name__)
 app.config.from_object(config)
+socketio = SocketIO(app)
 
 
 @app.route("/session/start", methods=['POST'])
@@ -29,6 +31,14 @@ def session_start():
     id_session = str(uuid.uuid4())
     session_controller.session_start(id_session, web_ip, web_agent)
     return jsonify(id_session=id_session)
+
+
+@socketio.on('connect')
+def connect():
+    id_session = request.args.get('id_session')
+    device_sid = request.args.get('sid')
+    device_type = request.args.get('type')
+    session_controller.on_connect(id_session, device_sid, device_type)
 
 
 @app.route("/session/mobile/connect", methods=['POST'])
