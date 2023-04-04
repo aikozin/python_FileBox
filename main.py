@@ -1,6 +1,6 @@
 import os
 import uuid
-from flask import Flask, request, jsonify, send_file
+from flask import Flask, request, jsonify, send_file, render_template
 from flask_socketio import SocketIO
 import data_controller
 import session_controller
@@ -10,6 +10,11 @@ from configuration import config
 app = Flask(__name__)
 app.config.from_object(config)
 socketio = SocketIO(app)
+
+
+@app.route('/')
+def index():
+    return render_template('index.html')
 
 
 @app.route("/session/start", methods=['POST'])
@@ -35,9 +40,14 @@ def session_start():
 
 @socketio.on('connect')
 def connect():
-    id_session = request.args.get('id_session')
-    device_sid = request.args.get('sid')
-    device_type = request.args.get('type')
+    print('Connected')
+
+
+@socketio.on('socket_in')
+def socket_in(data):
+    id_session = data['id_session']
+    device_sid = request.sid
+    device_type = data['type']
     session_controller.on_connect(id_session, device_sid, device_type)
 
 
@@ -177,3 +187,4 @@ def session_close():
 if __name__ == "__main__":
     trash_collector.start()
     app.run()
+    socketio.run(app)
