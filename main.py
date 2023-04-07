@@ -1,6 +1,7 @@
 import os
 import uuid
-from flask import Flask, request, jsonify, send_file
+from flask import Flask, request, jsonify, send_file, render_template
+from flask_socketio import SocketIO, emit
 import data_controller
 import session_controller
 from utils.trash_collector import trash_collector
@@ -8,6 +9,20 @@ from configuration import config
 
 app = Flask(__name__)
 app.config.from_object(config)
+socketio = SocketIO(app)
+
+
+@app.route('/')
+def index():
+    return render_template('index.html')
+
+
+@socketio.on('new_client')
+def handle_new_client(data):
+    # client_ip = request.remote_addr
+    # print(f'New client IP address {client_ip} has been connected')
+    device_sid, id_session, device_type = request.sid, data.get('id_session'), data.get('type')
+    session_controller.on_connect(id_session, device_sid, device_type)
 
 
 @app.route("/session/start", methods=['POST'])
@@ -85,35 +100,14 @@ def send_data():
         return jsonify(error='Invalid file source type'), 400
 
     file_name_real = file.filename
-    file_name_fs = id_session[:5] + str(uuid.uuid4()) + os.path.splitext(file_name_real)[1]
+    file_name_fs = ''.join((id_session[:5], str(uuid.uuid4()), os.path.splitext(file_name_real)[1]))
     data_controller.send_data_db(id_session, type_file, file_name_real, file_name_fs, source)
     data_controller.send_data_fs(file_name_fs, file)
+    clients = session_controller.get_sid(id_session)
+    clients_files = [(file_info.get('id'), file_info.get('file_name_real'))
+                     for file_info in data_controller.get_user_files_info(id_session)]
+    socketio.emit('available_files', clients_files, room=clients)
     return '', 200
-
-
-@app.route("/data/check", methods=['GET'])
-def check_data():
-    """
-
-    """
-
-    request_data = request.get_json()
-    if request_data:
-        if 'id_session' not in request_data or 'status' not in request_data:
-            return jsonify(error='Ошибка в параметрах запроса'), 400
-        id_session = request_data['id_session']
-        status = request_data['status']
-        if not id_session or not status:
-            return jsonify(error='Ошибка в параметрах запроса'), 400
-    else:
-        return jsonify(error='Ошибка в параметрах запроса'), 400
-    if session_controller.check_free_id(id_session):
-        return jsonify(error='Такая сессия не существует'), 400
-    if status not in config.STATUS_FILES:
-        return jsonify(error='Статус файла не действителен'), 400
-
-    result = data_controller.get_user_files_info(id_session, status)
-    return jsonify(files=result)
 
 
 @app.route("/data/get", methods=['GET'])
@@ -165,5 +159,5 @@ def session_close():
 
 
 if __name__ == "__main__":
-    trash_collector.start()
-    app.run()
+    # trash_collector.start()
+    socketio.run(app)

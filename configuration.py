@@ -7,6 +7,7 @@ class Config:
             default_config = json.load(f)
         self.DEBUG = default_config['DEBUG']
         self.MAX_CONTENT_LENGTH = default_config['MAX_CONTENT_LENGTH']
+        self.SECRET_KEY = default_config['SECRET_KEY']
         self.TYPE_FILES = default_config['TYPE_FILES']
         self.STATUS_FILES = default_config['STATUS_FILES']
         self.SOURCE_FILES = default_config['SOURCE_FILES']
@@ -22,12 +23,8 @@ class Config:
     def update_config(self, local_config):
         with open(local_config, 'r') as f:
             local_config = json.load(f)
-        for key, value in local_config.items():
-            if isinstance(value, dict):
-                for nested_key, nested_value in value.items():
-                    setattr(self, nested_key, nested_value)
-            else:
-                setattr(self, key, value)
+        [[setattr(self, nested_key, nested_value) for nested_key, nested_value in value.items()]
+         if isinstance(value, dict) else setattr(self, key, value) for key, value in local_config.items()]
 
 
 config = Config('config_files/default_config.json')
