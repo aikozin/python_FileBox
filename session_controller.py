@@ -56,7 +56,7 @@ def session_mobile_connect(id_session, mobile_ip, mobile_agent):
     :return: -
     """
 
-    query = 'UPDATE session SET mobile_ip=%s, mobile_agent=%s, WHERE id_session=%s'
+    query = 'UPDATE session SET mobile_ip=%s, mobile_agent=%s WHERE id_session=%s'
     db = db_connector.create_connection()
     val = (mobile_ip, mobile_agent, id_session)
     with db.cursor() as cursor:
@@ -160,11 +160,20 @@ def session_close(id_session):
 
 
 def on_connect(id_session, device_sid, device_type):
-    query = 'INSERT INTO client_sockets (id_session, sid_%s) VALUES (%s, %s) ' \
-            'ON DUPLICATE KEY UPDATE sid_%s = %s'
-    values = (device_type, id_session, device_sid, device_type, device_sid)
+    query = "INSERT INTO client_sockets (id_session, sid_{type}) VALUES ('{id}', '{sid}') " \
+            "ON DUPLICATE KEY UPDATE sid_{type} = '{sid}'".format(type=device_type, id=id_session, sid=device_sid)
     db = db_connector.create_connection()
     with db.cursor() as cursor:
-        cursor.execute(query, values)
+        cursor.execute(query)
         db.commit()
     db.close()
+
+
+def get_sid(id_session):
+    query = "SELECT sid_mobile, sid_web FROM client_sockets WHERE id_session='{id}'".format(id=id_session)
+    db = db_connector.create_connection()
+    with db.cursor() as cursor:
+        cursor.execute(query)
+        result = tuple(*cursor.fetchall())
+    db.close()
+    return result

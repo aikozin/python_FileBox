@@ -41,19 +41,18 @@ def send_data_fs(file_name_fs, file):
     file.save(file_path)
 
 
-def get_user_files_info(id_session, status):
+def get_user_files_info(id_session):
     """
-    Получение списка файлов с заданным id_session и status
+    Получение списка файлов с заданным id_session
 
     :param id_session: ID сессии
-    :param status: статус файла
     :return: массив файлов
     """
 
     json = list()
     db = db_connector.create_connection()
-    query = 'select * from data where id_session=%s and status=%s'
-    val = (id_session, status)
+    query = 'select * from data where id_session=%s'
+    val = (id_session,)
     with db.cursor() as cursor:
         cursor.execute(query, val)
         result = cursor.fetchall()
