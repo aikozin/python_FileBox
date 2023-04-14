@@ -22,3 +22,14 @@ CREATE TABLE `data` (
   KEY `fk_id_session` (`id_session`),
   CONSTRAINT `fk_id_session` FOREIGN KEY (`id_session`) REFERENCES `session` (`id_session`) ON DELETE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=57 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE client_sockets (
+id_session VARCHAR(36) NOT NULL,
+sid_mobile VARCHAR(255) NULL,
+sid_web VARCHAR(255) NULL,
+PRIMARY KEY (`id_session`),
+  UNIQUE KEY `id_session_UNIQUE` (`id_session`)
+);
+
+ALTER TABLE client_sockets
+ADD CONSTRAINT fkclient_sockets_session FOREIGN KEY (id_session) REFERENCES session(id_session) ON DELETE CASCADE

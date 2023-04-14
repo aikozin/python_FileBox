@@ -1,6 +1,5 @@
 from datetime import datetime, timedelta
 from configuration import config
-
 import db_connector
 
 
@@ -11,18 +10,14 @@ def check_free_id(id_session):
     :param id_session: ID сессии
     :return: true, если ID свободен
     """
-
-    is_free_id = False
-    db = db_connector.create_connection()
     query = 'SELECT * FROM session WHERE id_session=%s'
     val = (str(id_session),)
+    db = db_connector.create_connection()
     with db.cursor() as cursor:
         cursor.execute(query, val)
         result = cursor.fetchall()
-        if len(result) == 0:
-            is_free_id = True
     db.close()
-    return is_free_id
+    return (True, False)[len(result)]
 
 
 def session_start(id_session, web_ip, web_agent):
@@ -34,12 +29,11 @@ def session_start(id_session, web_ip, web_agent):
     :param web_agent: информация о браузере клиента
     :return: -
     """
-
-    db = db_connector.create_connection()
     time_start = datetime.now()
     time_end = time_start + timedelta(minutes=config.LIFE_TIME)
-    query = 'insert into session (id_session, time_start, time_end, web_ip, web_agent) values (%s, %s, %s, %s, %s)'
+    query = 'INSERT INTO session (id_session, time_start, time_end, web_ip, web_agent) VALUES (%s, %s, %s, %s, %s)'
     val = (id_session, time_start, time_end, web_ip, web_agent)
+    db = db_connector.create_connection()
     with db.cursor() as cursor:
         cursor.execute(query, val)
         db.commit()
@@ -55,10 +49,9 @@ def session_mobile_connect(id_session, mobile_ip, mobile_agent):
     :param mobile_agent: информация о системе телефона
     :return: -
     """
-
     query = 'UPDATE session SET mobile_ip=%s, mobile_agent=%s WHERE id_session=%s'
-    db = db_connector.create_connection()
     val = (mobile_ip, mobile_agent, id_session)
+    db = db_connector.create_connection()
     with db.cursor() as cursor:
         cursor.execute(query, val)
         db.commit()
@@ -70,26 +63,16 @@ def get_session_info(id_session):
     Метод для получения всей информации о сессии
 
     :param id_session: ID сессии
-    :return: список с информацией о сессии
+    :return: словарь с информацией о сессии в виде пар "имя столбца - значение"
     """
-
-    db = db_connector.create_connection()
     query = 'SELECT * FROM session WHERE id_session = %s'
     val = (id_session,)
+    db = db_connector.create_connection()
     with db.cursor() as cursor:
         cursor.execute(query, val)
-        result = cursor.fetchone()
-        row = {
-            "id": result[0],
-            "time_start": result[1],
-            "time_end": result[2],
-            "web_ip": result[3],
-            "web_agent": result[4],
-            "mobile_ip": result[5],
-            "mobile_agent": result[6]
-        }
+        response = {row_name: value for row_name, value in zip(config.SESSION_ROWS, cursor.fetchone())}
     db.close()
-    return row
+    return response
 
 
 def update_time_end(id_session, infinity=False):
@@ -105,8 +88,8 @@ def update_time_end(id_session, infinity=False):
     if infinity:
         time_end = current_time + timedelta(days=config.INFINITY_LIFE_TIME)
     query = 'UPDATE session SET time_end = %s WHERE id_session = %s'
-    db = db_connector.create_connection()
     val = (time_end, id_session)
+    db = db_connector.create_connection()
     with db.cursor() as cursor:
         cursor.execute(query, val)
         db.commit()
@@ -120,14 +103,14 @@ def session_is_alive(id_session):
     :param id_session: ID сессии
     :return: bool (True при выполнении условия проверки)
     """
-    db = db_connector.create_connection()
-    query = 'SELECT id_session FROM session WHERE id_session=%s and removal_flag=False'
+    query = 'SELECT * FROM session WHERE id_session=%s AND removal_flag=False'
     val = (id_session,)
+    db = db_connector.create_connection()
     with db.cursor() as cursor:
         cursor.execute(query, val)
         result = cursor.fetchall()
     db.close()
-    return (False, True)[len(result)]
+    return bool(result)
 
 
 def keep_alive(id_session):
@@ -135,10 +118,10 @@ def keep_alive(id_session):
     https://wiki.yandex.ru/homepage/moduli/rest-api/sessionkeep-alive/
     """
     time_end = datetime.now() + timedelta(minutes=config.LIFE_TIME)
-    db = db_connector.create_connection()
     query_to_session = 'UPDATE session SET time_end = %s WHERE id_session = %s'
     query_to_data = 'UPDATE data SET time_death = %s WHERE id_session = %s'
     values = (time_end, id_session)
+    db = db_connector.create_connection()
     with db.cursor() as cursor:
         cursor.execute(query_to_session, values)
         db.commit()
@@ -160,6 +143,10 @@ def session_close(id_session):
 
 
 def on_connect(id_session, device_sid, device_type):
+    """
+    При подключении нового пользователя к сокету создаёт в БД новую запись или обновляет уже существующую
+    https://wiki.yandex.ru/homepage/moduli/rest-api/notifikator-changes/
+    """
     query = "INSERT INTO client_sockets (id_session, sid_{type}) VALUES ('{id}', '{sid}') " \
             "ON DUPLICATE KEY UPDATE sid_{type} = '{sid}'".format(type=device_type, id=id_session, sid=device_sid)
     db = db_connector.create_connection()
@@ -170,6 +157,9 @@ def on_connect(id_session, device_sid, device_type):
 
 
 def get_sid(id_session):
+    """
+    Получает socket ID по ID сессии.
+    """
     query = "SELECT sid_mobile, sid_web FROM client_sockets WHERE id_session='{id}'".format(id=id_session)
     db = db_connector.create_connection()
     with db.cursor() as cursor:
