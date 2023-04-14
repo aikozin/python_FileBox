@@ -16,7 +16,7 @@ class TrashCollector(threading.Thread):
 
 
 def trash_proc():
-    print(f'\ntrash_collector is in progress...{datetime.now()}')  # {datetime.now():%y-%m-%d %H:%M:%S}
+    # print(f'\ntrash_collector is in progress...{datetime.now()}')  # {datetime.now():%y-%m-%d %H:%M:%S}
     db = db_connector.create_connection()
     with db.cursor() as cursor:
         cursor.execute('UPDATE session SET removal_flag = True WHERE now() > time_end')
@@ -36,9 +36,9 @@ def trash_proc():
         if files_to_delete:
             [os.remove(os.path.join(config.UPLOAD_FOLDER, file_name_fs)) for file_name_fs in files_to_delete
              if os.path.exists(os.path.join(config.UPLOAD_FOLDER, file_name_fs))]
-            print(f'Files deleted: {files_to_delete}')
-    return print(f'\nSessions deleted: {sessions_to_delete}{datetime.now()}' if sessions_to_delete
-                 else f'\nNothing was deleted...{datetime.now()}')
+            # print(f'Files deleted: {files_to_delete}')
+    # return print(f'\nSessions deleted: {sessions_to_delete}{datetime.now()}' if sessions_to_delete
+    #              else f'\nNothing was deleted...{datetime.now()}')
 
 
 trash_collector = TrashCollector()
