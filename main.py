@@ -30,16 +30,14 @@ def session_start():
     """
     https://wiki.yandex.ru/homepage/moduli/rest-api/sessionstart---start-sessii/
     """
-
     request_data = request.get_json()
-    if request_data:
-        if 'web_ip' not in request_data or 'web_agent' not in request_data:
-            return jsonify(error='Error in request parameters'), 400
-        web_ip = request_data['web_ip']
-        web_agent = request_data['web_agent']
-        if not web_ip or not web_agent:
-            return jsonify(error='Error in request parameters'), 400
-    else:
+    if not request_data:
+        return jsonify(error='Error in request parameters'), 400
+    if 'web_ip' not in request_data or 'web_agent' not in request_data:
+        return jsonify(error='Error in request parameters'), 400
+    web_ip = request_data.get('web_ip')
+    web_agent = request_data.get('web_agent')
+    if not web_ip or not web_agent:
         return jsonify(error='Error in request parameters'), 400
     id_session = str(uuid.uuid4())
     session_controller.session_start(id_session, web_ip, web_agent)
@@ -51,30 +49,27 @@ def session_mobile_connect():
     """
     https://wiki.yandex.ru/homepage/moduli/rest-api/vapv/
     """
-
     request_data = request.get_json()
-    if request_data:
-        if 'mobile_ip' not in request_data or 'mobile_agent' not in request_data or 'id_session' not in request_data:
-            return jsonify(error='Error in request parameters'), 400
-        mobile_ip = request_data['mobile_ip']
-        mobile_agent = request_data['mobile_agent']
-        id_session = request_data['id_session']
-        infinity = request_data.get('infinity')
-        if not mobile_ip or not mobile_agent or not id_session:
-            return jsonify(error='Error in request parameters'), 400
-    else:
+    if not request_data:
+        return jsonify(error='Error in request parameters'), 400
+    if any(param not in request_data for param in ('mobile_ip', 'mobile_agent', 'id_session')):
+        return jsonify(error='Error in request parameters'), 400
+    mobile_ip = request_data.get('mobile_ip')
+    mobile_agent = request_data.get('mobile_agent')
+    id_session = request_data.get('id_session')
+    infinity = request_data.get('infinity')
+    if not mobile_ip or not mobile_agent or not id_session:
         return jsonify(error='Error in request parameters'), 400
     if session_controller.check_free_id(id_session):
         return jsonify(error='Session with such ID does not exist'), 400
-
     session_controller.session_mobile_connect(id_session, mobile_ip, mobile_agent)
     session_controller.update_time_end(id_session, infinity)
     session = session_controller.get_session_info(id_session)
     return jsonify(
-        time_start=str(session['time_start']),
-        time_end=str(session['time_end']),
-        web_ip=session['web_ip'],
-        web_agent=session['web_agent']
+        time_start=str(session.get('time_start')),
+        time_end=str(session.get('time_end')),
+        web_ip=session.get('web_ip'),
+        web_agent=session.get('web_agent')
     )
 
 
@@ -83,10 +78,9 @@ def send_data():
     """
     https://wiki.yandex.ru/homepage/moduli/rest-api/datasend/
     """
-
     if 'file' not in request.files:
         return jsonify(error='File missing or error getting file'), 400
-    file = request.files['file']
+    file = request.files.get('file')
     id_session = request.args.get('id_session', '')
     type_file = request.args.get('type', '')
     source = request.args.get('source', '')
@@ -98,7 +92,6 @@ def send_data():
         return jsonify(error='Invalid file type'), 400
     if source not in config.SOURCE_FILES:
         return jsonify(error='Invalid file source type'), 400
-
     file_name_real = file.filename
     file_name_fs = ''.join((id_session[:5], str(uuid.uuid4()), os.path.splitext(file_name_real)[1]))
     data_controller.send_data_db(id_session, type_file, file_name_real, file_name_fs, source)
@@ -133,11 +126,10 @@ def keep_alive():
     request_data = request.get_json()
     if not request_data or 'id_session' not in request_data:
         return jsonify(error='Error in request parameters'), 400
-    id_session = request_data['id_session']
+    id_session = request_data.get('id_session')
     if not id_session:
         return jsonify(error='Error in request parameters'), 400
-    result = session_controller.session_is_alive(id_session)
-    if not result:
+    if not session_controller.session_is_alive(id_session):
         return jsonify(error='Session with such ID does not exist'), 400
     session_controller.keep_alive(id_session)
     return '', 200

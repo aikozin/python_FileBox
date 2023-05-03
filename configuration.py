@@ -15,6 +15,8 @@ class Config:
         self.LIFE_TIME = default_config['LIFE_TIME']
         self.INFINITY_LIFE_TIME = default_config['INFINITY_LIFE_TIME']
         self.TRASH_COLLECTOR_INTERVAL = default_config['TRASH_COLLECTOR_INTERVAL']
+        self.SESSION_ROWS = default_config['SESSION_ROWS']
+        self.DATA_ROWS = default_config['DATA_ROWS']
         self.HOST = default_config['DATABASE']['HOST']
         self.NAME = default_config['DATABASE']['NAME']
         self.USER = default_config['DATABASE']['USER']
@@ -23,8 +25,8 @@ class Config:
     def update_config(self, local_config):
         with open(local_config, 'r') as f:
             local_config = json.load(f)
-        [[setattr(self, nested_key, nested_value) for nested_key, nested_value in value.items()]
-         if isinstance(value, dict) else setattr(self, key, value) for key, value in local_config.items()]
+        [list(map(lambda keyval: setattr(self, keyval[0], keyval[1]), value.items())) if isinstance(value, dict)
+         else setattr(self, key, value) for key, value in local_config.items()]
 
 
 config = Config('config_files/default_config.json')
